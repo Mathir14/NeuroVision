@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Benchmark Tests</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+</head>
+<body>
+    <!-- Home Menu -->
+    <div id="home-menu" class="home-menu">
+        <nav class="top-nav">
+            <div class="nav-brand">
+                <span class="brand-icon">🧠</span>
+                <span class="brand-text">NeuroTest</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-link" onclick="showAssessments()">
+                    <span class="nav-icon">📋</span>
+                    Assessments
+                </button>
+                <button class="nav-link" onclick="showDashboard()">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </button>
+            </div>
+        </nav>
+
+        <div class="home-content">
+            <!-- Left side - AI Assistant -->
+            <div class="home-chat-section">
+                <div class="home-chat-container">
+                    <div class="home-chat-header">
+                        <h3>🤖 AI Assistant</h3>
+                        <p>Ask me anything about your performance</p>
+                    </div>
+                    <div id="home-chat-messages" class="home-chat-messages">
+                        <div class="chat-message bot-message">
+                            <div class="message-content">
+                                <p>👋 Hi! I'm your AI assistant. I can help you understand your test results, answer questions about the tests, or provide tips to improve your performance. How can I help you today?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="home-chat-input-container">
+                        <input type="text" id="home-chat-input" class="chat-input" placeholder="Ask me anything..." onkeypress="handleHomeChatKeyPress(event)">
+                        <button class="chat-send-btn" onclick="sendHomeMessage()">
+                            <span>➤</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side - Quick Stats -->
+            <div class="home-stats-section">
+                <div class="hero-section">
+                    <h1 class="hero-title">Cognitive Performance Suite</h1>
+                    <p class="hero-subtitle">Advanced neurological and cognitive assessment platform</p>
+                </div>
+                
+                <div class="stat-cards-home">
+                    <div class="stat-card-large">
+                        <div class="stat-icon">📊</div>
+                        <h3>Your Progress</h3>
+                        <div id="home-total-tests" class="stat-number">0</div>
+                        <p>Total Assessments Completed</p>
+                    </div>
+                    
+                    <div class="stat-card-large">
+                        <div class="stat-icon">🎯</div>
+                        <h3>Recent Activity</h3>
+                        <div id="home-recent-test" class="stat-text">No tests completed yet</div>
+                        <p>Last Assessment</p>
+                    </div>
+                </div>
+                
+                <div class="home-cta-section">
+                    <button class="cta-button" onclick="showAssessments()">Take an Assessment</button>
+                    <button class="cta-button secondary" onclick="showDashboard()">View Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessments Page -->
+    <div id="assessments-page" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Home</button>
+        <div class="assessments-container">
+            <div class="dashboard-hero">
+                <h1>Assessments</h1>
+                <p class="dashboard-subtitle">Select a cognitive assessment to begin</p>
+            </div>
+            
+            <div class="tests-container">
+            <div class="test-category">
+                <h3 class="category-title">Memory & Cognition</h3>
+                <div class="test-list">
+                    <div class="test-item" onclick="loadTest('reaction')">
+                        <div class="test-item-icon">⚡</div>
+                        <div class="test-item-content">
+                            <h4>Reaction Time</h4>
+                            <p>Visual reflex measurement</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                    <div class="test-item" onclick="loadTest('number-memory')">
+                        <div class="test-item-icon">🔢</div>
+                        <div class="test-item-content">
+                            <h4>Number Memory</h4>
+                            <p>Short-term memory capacity</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                    <div class="test-item" onclick="loadTest('sequence-memory')">
+                        <div class="test-item-icon">🎯</div>
+                        <div class="test-item-content">
+                            <h4>Sequence Memory</h4>
+                            <p>Visual-spatial pattern recognition</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                    <div class="test-item" onclick="loadTest('verbal-memory')">
+                        <div class="test-item-icon">💬</div>
+                        <div class="test-item-content">
+                            <h4>Verbal Memory</h4>
+                            <p>Word recognition and recall</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-category">
+                <h3 class="category-title">Motor & Coordination</h3>
+                <div class="test-list">
+                    <div class="test-item" onclick="loadTest('key-tapping')">
+                        <div class="test-item-icon">⌨️</div>
+                        <div class="test-item-content">
+                            <h4>Finger Tapping</h4>
+                            <p>Motor speed assessment</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                    <div class="test-item" onclick="loadTest('drawing-accuracy')">
+                        <div class="test-item-icon">✏️</div>
+                        <div class="test-item-content">
+                            <h4>Drawing Accuracy</h4>
+                            <p>Fine motor control precision</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                    <div class="test-item" onclick="loadTest('hand-stability')">
+                        <div class="test-item-icon">✋</div>
+                        <div class="test-item-content">
+                            <h4>Hand Stability</h4>
+                            <p>Tremor detection analysis</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-category">
+                <h3 class="category-title">Clinical Assessment</h3>
+                <div class="test-list">
+                    <div class="test-item" onclick="loadTest('speech-test')">
+                        <div class="test-item-icon">🎤</div>
+                        <div class="test-item-content">
+                            <h4>Speech Recognition</h4>
+                            <p>Articulation accuracy test</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                    <div class="test-item" onclick="loadTest('tug-test')">
+                        <div class="test-item-icon">🚶</div>
+                        <div class="test-item-content">
+                            <h4>Timed Up & Go</h4>
+                            <p>Mobility and fall risk evaluation</p>
+                        </div>
+                        <div class="test-item-arrow">→</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reaction Time Test -->
+    <div id="reaction-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="game-area" class="game-box waiting">
+            <div id="message">
+                <h1>Reaction Time Test</h1>
+                <p>Click anywhere to start</p>
+            </div>
+        </div>
+        
+        <div id="stats" class="stats hidden">
+            <h2>Test Complete!</h2>
+            <div class="result-box">
+                <div class="average-time">
+                    <span class="label">Average Time:</span>
+                    <span id="average-result">-</span>
+                </div>
+                <div class="current-time">
+                    <span class="label">Best Time:</span>
+                    <span id="current-result">-</span>
+                </div>
+            </div>
+            <div class="attempts">
+                <h3>All 5 Attempts:</h3>
+                <ul id="attempts-list"></ul>
+            </div>
+            <button id="reset-btn" class="reset-button">Start New Test</button>
+        </div>
+    </div>
+
+    <!-- Number Memory Test -->
+    <div id="number-memory-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="number-game-area" class="game-box">
+            <div id="number-message"></div>
+        </div>
+    </div>
+
+    <!-- Sequence Memory Test -->
+    <div id="sequence-memory-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="sequence-game-area" class="game-box">
+            <div id="sequence-message">
+                <h1>Sequence Memory</h1>
+                <p>Memorize the pattern</p>
+                <p style="margin-top: 30px; font-size: 1.1em;">Level 1</p>
+                <p style="margin-top: 20px; opacity: 0.9;">Click anywhere to begin</p>
+            </div>
+            <div id="sequence-grid" class="sequence-grid hidden"></div>
+        </div>
+    </div>
+
+    <!-- Key Tapping Test -->
+    <div id="key-tapping-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="key-tapping-game-area" class="game-box" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
+            <div id="key-tapping-start-screen" class="click-area">
+                <h1>Key Tapping Test</h1>
+                <p>Alternate tapping between the two keys</p>
+                <p>Tap as fast as you can for 15 seconds</p>
+                <p style="margin-top: 20px; font-size: 0.9em;">This test measures motor speed and rhythm</p>
+                <p style="margin-top: 30px;">Click anywhere to start</p>
+            </div>
+            <div id="key-tapping-play-area" class="key-tapping-play-area hidden">
+                <div class="key-tapping-timer">
+                    <span id="key-tapping-time">15.0s</span>
+                </div>
+                <div class="key-tapping-keys">
+                    <button id="key-left" class="tapping-key">Q</button>
+                    <button id="key-right" class="tapping-key">P</button>
+                </div>
+                <div class="key-tapping-stats">
+                    <div class="tap-stat">
+                        <span class="stat-label">Total Taps</span>
+                        <span id="total-taps" class="stat-value">0</span>
+                    </div>
+                    <div class="tap-stat">
+                        <span class="stat-label">Taps/Second</span>
+                        <span id="taps-per-second" class="stat-value">0.0</span>
+                    </div>
+                </div>
+            </div>
+            <div id="key-tapping-results" class="results hidden">
+                <h2>Results</h2>
+                <div class="result-label">Total Taps</div>
+                <div id="final-taps" class="result-message">0</div>
+                <div class="result-label" style="margin-top: 30px;">Average Speed</div>
+                <div id="final-taps-per-second" class="avg-time">0.0</div>
+                <p style="margin-top: 20px;">taps per second</p>
+                <button class="restart-button" onclick="restartKeyTapping()">Test Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verbal Memory Test -->
+    <div id="verbal-memory-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="verbal-game-area" class="game-box" style="background: #3498db;">
+            <div id="verbal-start-screen" class="verbal-start-screen">
+                <h1>Verbal Memory</h1>
+                <p>You will be shown words, one at a time</p>
+                <p>If you've seen the word during this test, click SEEN</p>
+                <p>If it's a new word, click NEW</p>
+                <p style="margin-top: 30px; opacity: 0.9;">Click anywhere to begin</p>
+            </div>
+            <div id="verbal-play-area" class="verbal-play-area hidden">
+                <div id="verbal-stats" class="verbal-stats">
+                    <div class="verbal-stat-item">
+                        <span class="verbal-stat-label">Score</span>
+                        <span id="verbal-score" class="verbal-stat-value">0</span>
+                    </div>
+                    <div class="verbal-stat-item">
+                        <span class="verbal-stat-label">Lives</span>
+                        <span id="verbal-lives" class="verbal-stat-value">3</span>
+                    </div>
+                </div>
+                <div id="verbal-word" class="verbal-word"></div>
+                <div class="verbal-buttons">
+                    <button id="verbal-seen-btn" class="verbal-button verbal-seen">SEEN</button>
+                    <button id="verbal-new-btn" class="verbal-button verbal-new">NEW</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawing Accuracy Test -->
+    <div id="drawing-accuracy-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="drawing-game-area" class="game-box" style="background: #f5f5f5;">
+            <div id="drawing-start-screen" class="drawing-start-screen">
+                <h1>Drawing Accuracy</h1>
+                <p>You'll see a shape outline</p>
+                <p>Draw over it as accurately as you can</p>
+                <p style="margin-top: 30px; opacity: 0.9;">Click anywhere to begin</p>
+            </div>
+            <div id="drawing-play-area" class="drawing-play-area hidden">
+                <div id="drawing-instruction" class="drawing-instruction"></div>
+                <canvas id="drawing-canvas" width="800" height="800"></canvas>
+                <button id="drawing-done-btn" class="drawing-done-btn hidden">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speech Test -->
+    <div id="speech-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="speech-game-area" class="game-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div id="speech-start-screen" class="speech-start-screen">
+                <h1>Speech Test</h1>
+                <p>You'll be shown a sentence</p>
+                <p>Click the microphone button and repeat it out loud</p>
+                <p style="margin-top: 30px; opacity: 0.9;">Click anywhere to begin</p>
+            </div>
+            <div id="speech-play-area" class="speech-play-area hidden">
+                <div class="speech-header">
+                    <div class="speech-score-display">
+                        <span class="speech-label">Score</span>
+                        <span id="speech-score" class="speech-score-value">0</span>
+                    </div>
+                    <div class="speech-round-display">
+                        <span class="speech-label">Round</span>
+                        <span id="speech-round" class="speech-round-value">1/5</span>
+                    </div>
+                </div>
+                <div id="speech-sentence" class="speech-sentence"></div>
+                <div class="speech-controls">
+                    <button id="speech-mic-btn" class="speech-mic-btn">
+                        <span class="mic-icon">🎤</span>
+                        <span class="mic-text">Click to Speak</span>
+                    </button>
+                    <button id="speech-done-btn" class="speech-done-btn hidden">Done Speaking</button>
+                </div>
+                <div id="speech-transcript" class="speech-transcript hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hand Stability Test -->
+    <div id="hand-stability-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="stability-game-area" class="game-box" style="background: #2c3e50;">
+            <div id="stability-start-screen" class="stability-start-screen" onclick="startStabilityTest()">
+                <h1>Hand Stability Test</h1>
+                <p>👆 Point your finger at the green circle</p>
+                <p>Keep your fingertip inside the circle for 30 seconds</p>
+                <p>The camera will track your finger movement</p>
+                <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">Tests hand steadiness and tremor control</p>
+                <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.7;">⚠️ Requires camera access</p>
+                <p style="margin-top: 30px; opacity: 0.9;">Click anywhere to begin</p>
+            </div>
+            <div id="stability-play-area" class="stability-play-area hidden">
+                <div class="stability-video-container">
+                    <video id="stability-video" autoplay playsinline></video>
+                    <canvas id="stability-canvas"></canvas>
+                    <div class="stability-target">
+                        <div class="stability-target-inner"></div>
+                    </div>
+                </div>
+                <div class="stability-info">
+                    <div class="stability-timer">
+                        <span class="stability-label">Time Remaining</span>
+                        <span id="stability-timer-value" class="stability-value">30.0s</span>
+                    </div>
+                    <div class="stability-status">
+                        <span class="stability-label">Status</span>
+                        <span id="stability-status-value" class="stability-value">Point at circle</span>
+                    </div>
+                    <div class="stability-accuracy">
+                        <span class="stability-label">Accuracy</span>
+                        <span id="stability-accuracy-value" class="stability-value">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div id="stability-results" class="stability-results hidden">
+                <h2>Your Stability Score</h2>
+                <div class="stability-score">95</div>
+                <div class="rating">Excellent</div>
+                <p>Higher scores indicate better hand stability</p>
+                <div class="details">Movement variance: 0.42 | Data points: 200</div>
+                <button class="restart-button" onclick="restartStabilityTest()">Test Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TUG Test -->
+    <div id="tug-test" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div id="tug-game-area" class="game-box" style="background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);">
+            <div id="tug-start-screen" class="click-area">
+                <h1>Timed Up and Go Test</h1>
+                <p>📱 Prop your phone on a chair/table</p>
+                <p>🚶 Stand 3 meters (10 feet) away</p>
+                <p>➡️ Walk to phone, turn around, walk back</p>
+                <p style="margin-top: 20px; font-size: 0.9em;">This test measures gait and turning ability</p>
+                <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.8;">Clinical test for fall risk and Parkinson's</p>
+                <p style="margin-top: 30px;">Click anywhere to start</p>
+            </div>
+            <div id="tug-play-area" class="tug-play-area hidden">
+                <div class="tug-video-container">
+                    <video id="tug-video" autoplay playsinline></video>
+                    <canvas id="tug-canvas"></canvas>
+                </div>
+                <div class="tug-info">
+                    <div class="tug-status">
+                        <span class="tug-label">Status</span>
+                        <span id="tug-status-value" class="tug-value">Get ready...</span>
+                    </div>
+                    <div class="tug-timer">
+                        <span class="tug-label">Time</span>
+                        <span id="tug-timer-value" class="tug-value">0.0s</span>
+                    </div>
+                    <div class="tug-phase">
+                        <span class="tug-label">Phase</span>
+                        <span id="tug-phase-value" class="tug-value">Waiting</span>
+                    </div>
+                </div>
+            </div>
+            <div id="tug-results" class="tug-results hidden">
+                <h2>Your TUG Results</h2>
+                <div class="tug-score">8.5</div>
+                <div class="rating">Good Mobility</div>
+                <div class="tug-details">
+                    <p><strong>Total Time:</strong> <span id="tug-total-time">8.5s</span></p>
+                    <p><strong>Turn Time:</strong> <span id="tug-turn-time">2.1s</span></p>
+                    <p><strong>Turn Steps:</strong> <span id="tug-turn-steps">3</span></p>
+                    <p><strong>Assessment:</strong> <span id="tug-assessment">Normal mobility</span></p>
+                </div>
+                <div class="details" style="margin-top: 20px; font-size: 0.9em;">
+                    <strong>Reference:</strong> <10s: Excellent | 10-12s: Normal | 12-20s: Mild difficulty | >20s: High fall risk
+                </div>
+                <button class="restart-button" onclick="restartTugTest()">Test Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="test-container hidden">
+        <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        <div class="dashboard-container">
+            <div class="dashboard-hero">
+                <h1>Performance Dashboard</h1>
+                <p class="dashboard-subtitle">Track your cognitive performance across all assessments</p>
+            </div>
+            <div id="dashboard-content" class="dashboard-content">
+                <!-- Dashboard items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph Modal -->
+    <div id="graph-modal" class="graph-modal hidden">
+        <div class="graph-modal-content">
+            <button class="graph-close-btn" onclick="closeGraph()">✕</button>
+            <h2 id="graph-title">Progress Chart</h2>
+            <canvas id="progress-chart"></canvas>
+            <div id="graph-stats" class="graph-stats"></div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot -->
+    <button id="chat-toggle-btn" class="chat-toggle-btn" onclick="toggleChat()">
+        <span class="chat-icon">💬</span>
+    </button>
+
+    <div id="chat-container" class="chat-container hidden">
+        <div class="chat-header">
+            <h3>AI Assistant</h3>
+            <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <div class="chat-message bot-message">
+                <div class="message-content">
+                    <p>👋 Hi! I'm your AI assistant. I can help you understand your test results, answer questions about the tests, or provide tips to improve your performance. How can I help you today?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Ask me anything..." onkeypress="handleChatKeyPress(event)">
+            <button class="chat-send-btn" onclick="sendMessage()">
+                <span>➤</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

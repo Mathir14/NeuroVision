@@ -364,8 +364,7 @@ async function sendHomeMessage() {
 }
 
 // ========== AI CHATBOT ==========
-const GROQ_API_KEY = ''; // use your own key here.
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_API_URL = '/.netlify/functions/groq';
 let chatHistory = [];
 
 function toggleChat() {

@@ -441,10 +441,9 @@ Provide friendly, specific, evidence-based advice. Use emojis occasionally. Keep
         ];
         
         // Call Groq AI API
-        const response = await fetch(GROQ_API_URL, {
+        const response = await fetch('/.netlify/functions/groq', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
